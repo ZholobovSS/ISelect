@@ -78,7 +78,6 @@ export default class ISelect {
   }
 
   globalKeypress = (e) => {
-    console.log(e)
     if (this.isOpen && e.keyCode === 27) {
       this.isOpen = false
         this.animation()
