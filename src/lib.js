@@ -2,20 +2,22 @@ export default class ISelect {
   constructor(el) {
     this.el = el
     this.options = []
+    this.optionSelected
     this.isValid = true
     this.template = ''
     this.isOpen = false
-    this.init()
     this.customSelectWr
     this.customSelect
     this.customOptionsWr
     this.isAnimating = false
     this.animationSpeed = 300
+    this.init()
   }
 
   init() {
     if (this.checkValid()) {
       [...this.el.options].forEach((el) => this.options.push(el.value))
+      this.optionSelected = this.options[0]
       this.hideOriginal()
       this.generateTemplate()
       this.logger(this.template)
@@ -28,11 +30,11 @@ export default class ISelect {
     let template = `
       <div class="customSelectWr">
         <div data-customSelect class="customSelect">
-          ${this.options[0]}
+          ${this.optionSelected}
         </div>
         <div data-optionsContainer class="customSelectOptionsWr">`
     this.options.forEach((opt,i) => {
-      template += `<div class="customSelectOption ${!i ? 'active' : ''}">${opt}</div>`
+      template += `<div data-option="${opt}" class="customSelectOption ${!i ? 'active' : ''}">${opt}</div>`
     })
     template += `</div>`
     this.template = template
@@ -43,12 +45,14 @@ export default class ISelect {
   }
 
   addEventListeners() {
-    this.customSelect.addEventListener('click', this.clickListener)
+    this.customSelectWr.addEventListener('click', this.clickListener)
   }
-  
-  clickListener = (e) => {
-    this.isOpen = !this.isOpen
 
+  removeEventListeners() {
+    this.customSelectWr.removeEventListener('click', this.clickListener)
+  }
+
+  animation() {
     if (!this.isAnimating) {
       if (this.isOpen) {
         this.customSelect.classList.add('active')
@@ -57,6 +61,20 @@ export default class ISelect {
         this.customSelect.classList.remove('active') 
         this.fadeOut()
       }
+    }
+  }
+  
+  clickListener = (e) => {
+    this.isOpen = !this.isOpen
+    this.animation()
+    this.choseOption(e)
+  }
+
+  choseOption(e) {
+    if (e.target.dataset.option) {
+      this.optionSelected = e.target.dataset.option
+      this.customSelect.innerText = this.optionSelected
+      this.el.value = this.optionSelected
     }
   }
 
