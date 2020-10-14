@@ -22,13 +22,13 @@ export default class ISelect {
       this.generateTemplate()
       this.logger(this.template)
       this.insertToPage()
-      this.addEventListeners()
+      this.addEventListener(this.customSelectWr, 'click', this.clickListener)
     }
   }
 
   generateTemplate() {
     let template = `
-      <div class="customSelectWr">
+      <div data-customSelectWr class="customSelectWr">
         <div data-customSelect class="customSelect">
           ${this.optionSelected}
         </div>
@@ -44,12 +44,12 @@ export default class ISelect {
     this.el.classList.add('hide')
   }
 
-  addEventListeners() {
-    this.customSelectWr.addEventListener('click', this.clickListener)
+  addEventListener(el, type, func) {
+    el.addEventListener(type, func)
   }
 
-  removeEventListeners() {
-    this.customSelectWr.removeEventListener('click', this.clickListener)
+  removeEventListener(el, type, func) {
+    el.removeEventListener(type, func)
   }
 
   animation() {
@@ -68,6 +68,32 @@ export default class ISelect {
     this.isOpen = !this.isOpen
     this.animation()
     this.choseOption(e)
+    if (this.isOpen) {
+      this.addEventListener(document, 'keydown', this.globalKeypress)
+      this.addEventListener(document, 'click', this.globalClick)
+    } else {
+      this.removeEventListener(document, 'click', this.globalClick)
+      this.removeEventListener(document, 'keydown', this.globalKeypress)
+    }
+  }
+
+  globalKeypress = (e) => {
+    console.log(e)
+    if (this.isOpen && e.keyCode === 27) {
+      this.isOpen = false
+        this.animation()
+        this.removeEventListener(document, 'keydown', this.globalKeypress)
+    }
+  }
+
+  globalClick = (e) => {
+    if (!e.target.closest('[data-customSelectWr]')) {
+      if (this.isOpen) {
+        this.isOpen = false
+        this.animation()
+        this.removeEventListener(document, 'click', this.globalClick)
+      } 
+    }
   }
 
   choseOption(e) {
