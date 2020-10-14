@@ -11,13 +11,16 @@
 
 .customSelectWr {
   position: relative;
+  max-width: 280px;
+  width: 100%;
 }
 
 
 .customSelect {
-  padding: 0.5rem 1rem;
+  padding: .5rem 2rem .5rem 1rem;
   cursor: pointer;
   position: relative;
+  width: 100%;
   border-bottom: 2px solid var(--main-color);
 }
 
@@ -65,7 +68,8 @@
   z-index: 10;
   left: 0;
   top: calc(100% + 16px);
-  width: auto;
+  width: 100%;
+  max-width: 280px;
   min-width: 180px;
   max-height: 160px;
   overflow-x: hidden;

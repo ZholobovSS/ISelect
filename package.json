@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "NODE_ENV=production parcel build src/index.html --no-source-maps --experimental-scope-hoisting --out-dir ./public",
-    "LB": "NODE_ENV=production parcel build --public-url '.' src/index.html --no-source-maps --experimental-scope-hoisting --out-dir ./public",
+    "LB": "NODE_ENV=production parcel build --public-url '.' src/index.html --no-source-maps --experimental-scope-hoisting --out-dir ./docs",
     "dev": "npx npm-run-all --parallel parcel",
     "parcel": "parcel --open --port 9999 src/index.html --out-dir ./public",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -7,6 +7,7 @@ export default class ISelect {
     this.template = ''
     this.isOpen = false
     this.customSelectWr
+    this.date = Date.now()
     this.customSelect
     this.customOptionsWr
     this.isAnimating = false
@@ -16,7 +17,10 @@ export default class ISelect {
 
   init() {
     if (this.checkValid()) {
-      [...this.el.options].forEach((el) => this.options.push(el.value))
+      [...this.el.options].forEach((el) => this.options.push({
+        value: el.value,
+        text: el.innerText
+      }))
       this.optionSelected = this.options[0]
       this.hideOriginal()
       this.generateTemplate()
@@ -29,11 +33,11 @@ export default class ISelect {
     let template = `
       <div data-customSelectWr class="customSelectWr">
         <div data-customSelect class="customSelect">
-          ${this.optionSelected}
+          ${this.optionSelected.text}
         </div>
         <div data-optionsContainer class="customSelectOptionsWr">`
     this.options.forEach((opt,i) => {
-      template += `<div data-option="${opt}" class="customSelectOption ${!i ? 'active' : ''}">${opt}</div>`
+      template += `<div data-option="${opt.value}" class="customSelectOption ${!i ? 'active' : ''}">${opt.text}</div>`
     })
     template += `</div>`
     this.template = template
@@ -49,6 +53,16 @@ export default class ISelect {
 
   removeEventListener(el, type, func) {
     el.removeEventListener(type, func)
+  }
+
+  addGlobalListeners() {
+    this.addEventListener(document, 'keydown', this.globalKeypress)
+    this.addEventListener(document, 'click', this.globalClick)
+  }
+
+  removeGlobalListeners() {
+    this.removeEventListener(document, 'click', this.globalClick)
+    this.removeEventListener(document, 'keydown', this.globalKeypress) 
   }
 
   animation() {
@@ -68,11 +82,9 @@ export default class ISelect {
     this.animation()
     this.choseOption(e)
     if (this.isOpen) {
-      this.addEventListener(document, 'keydown', this.globalKeypress)
-      this.addEventListener(document, 'click', this.globalClick)
+      this.addGlobalListeners()
     } else {
-      this.removeEventListener(document, 'click', this.globalClick)
-      this.removeEventListener(document, 'keydown', this.globalKeypress)
+      this.removeGlobalListeners()
     }
   }
 
@@ -80,25 +92,27 @@ export default class ISelect {
     if (this.isOpen && e.keyCode === 27) {
       this.isOpen = false
         this.animation()
-        this.removeEventListener(document, 'keydown', this.globalKeypress)
+        this.removeGlobalListeners()
     }
   }
 
   globalClick = (e) => {
-    if (!e.target.closest('[data-customSelectWr]')) {
+    if (!e.target.closest('[data-customSelectWr]') && e.target !== this.el) {
       if (this.isOpen) {
         this.isOpen = false
         this.animation()
-        this.removeEventListener(document, 'click', this.globalClick)
+        this.removeGlobalListeners()
       } 
     }
   }
 
   choseOption(e) {
     if (e.target.dataset.option) {
-      this.optionSelected = e.target.dataset.option
-      this.customSelect.innerText = this.optionSelected
-      this.el.value = this.optionSelected
+      this.optionSelected = { value: e.target.dataset.option, text: e.target.innerText }
+      this.customSelect.innerText = this.optionSelected.text
+      this.el.value = this.optionSelected.value
+      this.customOptionsWr.querySelector('.active').classList.remove('active')
+      e.target.classList.add('active')
     }
   }
 
