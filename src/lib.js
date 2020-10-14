@@ -20,7 +20,6 @@ export default class ISelect {
       this.optionSelected = this.options[0]
       this.hideOriginal()
       this.generateTemplate()
-      this.logger(this.template)
       this.insertToPage()
       this.addEventListener(this.customSelectWr, 'click', this.clickListener)
     }
