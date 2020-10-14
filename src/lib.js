@@ -1,15 +1,14 @@
 export default class ISelect {
   constructor(el) {
-    this.el = el
+    this.$el = el
+    this.$customSelectWr
+    this.$customSelect
+    this.$customOptionsWr
     this.options = []
     this.optionSelected
     this.isValid = true
     this.template = ''
     this.isOpen = false
-    this.customSelectWr
-    this.date = Date.now()
-    this.customSelect
-    this.customOptionsWr
     this.isAnimating = false
     this.animationSpeed = 300
     this.init()
@@ -17,7 +16,7 @@ export default class ISelect {
 
   init() {
     if (this.checkValid()) {
-      [...this.el.options].forEach((el) => this.options.push({
+      [...this.$el.options].forEach((el) => this.options.push({
         value: el.value,
         text: el.innerText
       }))
@@ -25,7 +24,7 @@ export default class ISelect {
       this.hideOriginal()
       this.generateTemplate()
       this.insertToPage()
-      this.addEventListener(this.customSelectWr, 'click', this.clickListener)
+      this.addEventListener(this.$customSelectWr, 'click', this.clickListener)
     }
   }
 
@@ -44,7 +43,7 @@ export default class ISelect {
   }
 
   hideOriginal() {
-    this.el.classList.add('hide')
+    this.$el.classList.add('hide')
   }
 
   addEventListener(el, type, func) {
@@ -68,10 +67,10 @@ export default class ISelect {
   animation() {
     if (!this.isAnimating) {
       if (this.isOpen) {
-        this.customSelect.classList.add('active')
+        this.$customSelect.classList.add('active')
         this.fadeIn()
       } else {
-        this.customSelect.classList.remove('active') 
+        this.$customSelect.classList.remove('active') 
         this.fadeOut()
       }
     }
@@ -97,7 +96,7 @@ export default class ISelect {
   }
 
   globalClick = (e) => {
-    if (!e.target.closest('[data-customSelectWr]') && e.target !== this.el) {
+    if (!e.target.closest('[data-customSelectWr]') && e.target !== this.$el) {
       if (this.isOpen) {
         this.isOpen = false
         this.animation()
@@ -109,23 +108,24 @@ export default class ISelect {
   choseOption(e) {
     if (e.target.dataset.option) {
       this.optionSelected = { value: e.target.dataset.option, text: e.target.innerText }
-      this.customSelect.innerText = this.optionSelected.text
-      this.el.value = this.optionSelected.value
-      this.customOptionsWr.querySelector('.active').classList.remove('active')
+      this.$customSelect.innerText = this.optionSelected.text
+      this.$el.value = this.optionSelected.value
+      this.$customOptionsWr.querySelector('.active').classList.remove('active')
       e.target.classList.add('active')
+      this.$el.dispatchEvent(new Event('change'))
     }
   }
 
   fadeIn() {
     this.isAnimating = true
-    this.customOptionsWr.classList.remove('exit-done')
-    this.customOptionsWr.classList.add('enter')
+    this.$customOptionsWr.classList.remove('exit-done')
+    this.$customOptionsWr.classList.add('enter')
     setTimeout( () => {
-      this.customOptionsWr.classList.add('enter-active')
+      this.$customOptionsWr.classList.add('enter-active')
       setTimeout( () => {
-        this.customOptionsWr.classList.add('enter-done')
-        this.customOptionsWr.classList.remove('enter')
-        this.customOptionsWr.classList.remove('enter-active')
+        this.$customOptionsWr.classList.add('enter-done')
+        this.$customOptionsWr.classList.remove('enter')
+        this.$customOptionsWr.classList.remove('enter-active')
         this.isAnimating = false
       }, this.animationSpeed) 
     } )
@@ -133,28 +133,28 @@ export default class ISelect {
 
   fadeOut() {
     this.isAnimating = true
-    this.customOptionsWr.classList.remove('enter-done')
-    this.customOptionsWr.classList.add('exit')
+    this.$customOptionsWr.classList.remove('enter-done')
+    this.$customOptionsWr.classList.add('exit')
     setTimeout( () => {
-      this.customOptionsWr.classList.add('exit-active')
+      this.$customOptionsWr.classList.add('exit-active')
       setTimeout( () => {
-        this.customOptionsWr.classList.add('exit-done')
-        this.customOptionsWr.classList.remove('exit')
-        this.customOptionsWr.classList.remove('exit-active')
+        this.$customOptionsWr.classList.add('exit-done')
+        this.$customOptionsWr.classList.remove('exit')
+        this.$customOptionsWr.classList.remove('exit-active')
         this.isAnimating = false
       }, this.animationSpeed) 
     } )
   }
 
   insertToPage() {
-    this.el.insertAdjacentHTML('afterend', this.template)
-    this.customSelectWr = this.el.nextElementSibling
-    this.customSelect = this.customSelectWr.firstElementChild
-    this.customOptionsWr = this.customSelect.nextElementSibling
+    this.$el.insertAdjacentHTML('afterend', this.template)
+    this.$customSelectWr = this.$el.nextElementSibling
+    this.$customSelect = this.$customSelectWr.firstElementChild
+    this.$customOptionsWr = this.$customSelect.nextElementSibling
   }
 
   checkValid() {
-    this.isValid = this.el.tagName === 'SELECT'
+    this.isValid = this.$el.tagName === 'SELECT'
     if (!this.isValid) this.showError()
     return this.isValid
   }
