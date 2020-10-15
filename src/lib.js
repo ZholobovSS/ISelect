@@ -11,21 +11,52 @@ export default class ISelect {
     this.isOpen = false
     this.isAnimating = false
     this.animationSpeed = 300
+    this.observer
     this.init()
+    
   }
 
   init() {
     if (this.checkValid()) {
-      [...this.$el.options].forEach((el) => this.options.push({
+      this.run()
+      this.initMutationObserver()
+    }
+  }
+
+  run() {
+    this.observer && this.observer.disconnect();
+    this.options = [];
+    this.optionSelected = undefined;
+    [...this.$el.options].forEach((el) => {
+      let option = {
         value: el.value,
-        text: el.innerText
-      }))
-      this.optionSelected = this.options[0]
+        text: el.innerText,
+        selected: el.selected
+      }
+      this.options.push(option)
+    })
+    if (this.options.length) {
+      const selectedOption = this.options.find(el => el.selected)
+      if (!selectedOption) {
+        this.options[0].selected = true
+        selectedOption = this.options[0]
+      }
+      this.optionSelected = selectedOption
       this.hideOriginal()
       this.generateTemplate()
       this.insertToPage()
-      this.addEventListener(this.$customSelectWr, 'click', this.clickListener)
     }
+    this.initMutationObserver()
+  }
+
+  initMutationObserver() {
+    const config = { attributes: true, childList: true, subtree: true };
+    this.observer = this.observer ? this.observer : new MutationObserver(this.mutationObserverCallback)
+    this.observer.observe(this.$el, config)
+  }
+
+  mutationObserverCallback = (mutationsList, observer) => {
+    if (mutationsList.length) this.run()
   }
 
   generateTemplate() {
@@ -36,7 +67,7 @@ export default class ISelect {
         </div>
         <div data-optionsContainer class="customSelectOptionsWr">`
     this.options.forEach((opt,i) => {
-      template += `<div data-option="${opt.value}" class="customSelectOption ${!i ? 'active' : ''}">${opt.text}</div>`
+      template += `<div data-option="${opt.value}" class="customSelectOption ${opt.selected ? 'active' : ''}">${opt.text}</div>`
     })
     template += `</div>`
     this.template = template
@@ -147,10 +178,15 @@ export default class ISelect {
   }
 
   insertToPage() {
+    if (this.$customSelectWr) {
+      this.removeGlobalListeners(this.$customSelectWr, 'click', this.clickListener)
+      this.$customSelectWr.remove()
+    } 
     this.$el.insertAdjacentHTML('afterend', this.template)
     this.$customSelectWr = this.$el.nextElementSibling
     this.$customSelect = this.$customSelectWr.firstElementChild
     this.$customOptionsWr = this.$customSelect.nextElementSibling
+    this.addEventListener(this.$customSelectWr, 'click', this.clickListener)
   }
 
   checkValid() {
