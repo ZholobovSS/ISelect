@@ -13,13 +13,13 @@ export default class ISelect {
     this.animationSpeed = 300
     this.observer
     this.init()
-    
   }
 
   init() {
     if (this.checkValid()) {
       this.run()
       this.initMutationObserver()
+      this.addEventListener(this.$el, 'change', this.changeListener)
     }
   }
 
@@ -36,17 +36,32 @@ export default class ISelect {
       this.options.push(option)
     })
     if (this.options.length) {
+      this.detectedSelectedOption()
+      this.hideOriginal()
+      this.generateTemplate()
+      this.insertToPage()
+    }
+    this.initMutationObserver()
+  }
+
+  detectedSelectedOption() {
+    if (this.$el.value) {
+      this.optionSelected = {
+        value: this.$el.value,
+        text: this.options.find(el => el.value === this.$el.value).text
+      }
+    } else {
       const selectedOption = this.options.find(el => el.selected)
       if (!selectedOption) {
         this.options[0].selected = true
         selectedOption = this.options[0]
       }
       this.optionSelected = selectedOption
-      this.hideOriginal()
-      this.generateTemplate()
-      this.insertToPage()
     }
-    this.initMutationObserver()
+  }
+
+  changeListener = () => {
+    this.run()
   }
 
   initMutationObserver() {
