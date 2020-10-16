@@ -20,6 +20,8 @@ export default class ISelect {
       this.run()
       this.initMutationObserver()
       this.addEventListener(this.$el, 'change', this.changeListener)
+    } else {
+      this.logger(`Init element ${this.$el.tagName} is not SELECT`, 'error')
     }
   }
 
@@ -206,15 +208,10 @@ export default class ISelect {
 
   checkValid() {
     this.isValid = this.$el.tagName === 'SELECT'
-    if (!this.isValid) this.showError()
     return this.isValid
   }
 
-  showError() {
-    console.log('AHTUNG: el is not select tag')
-  }
-
-  logger(info) {
-    console.log('Logger: ', info)
+  logger(info, type = 'log') {
+    console[type]('Logger: ', info)
   }
 }
